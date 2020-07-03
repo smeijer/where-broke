@@ -1,22 +1,27 @@
 {
   "name": "where-broke",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "",
   "source": "src/index.js",
   "bin": "bin/where-broke.js",
   "main": "dist/index.js",
+  "license": "MIT",
+  "author": "Stephan Meijer <stephan@meijer.ws>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smeijer/where-broke.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf ./dist && microbundle -i src/index.js -o dist/index.js --no-pkg-main -f umd",
     "prepublish": "npm run build"
   },
   "files": [
+    "docs",
     "dist",
     "bin"
   ],
   "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "microbundle": "^0.12.2",
     "rimraf": "^3.0.2"
