@@ -4,11 +4,14 @@
 
 ![animation of where-broke results](./docs/where-broke.gif)
 
-Most often when there is a regression in a lib that we use, we want to know what the last working version was. This project helps you find that version!
+Most often when there is a regression in a lib that we use, we want to know what
+the last working version was. This project helps you find that version!
 
 ## Usage
 
-Run the following command in the root of the the project that contains the breaking test (next to `package.json`). Replace `{lib}` with the module name that you wish to bisect.
+Run the following command in the root of the the project that contains the
+breaking test (next to `package.json`). Replace `{lib}` with the module name
+that you wish to bisect.
 
 ```shell
 npx where-broke {lib}
@@ -25,7 +28,10 @@ To make this work, the project should match the following requirements:
 
 ## Example
 
-For example, at a certain moment, `@testing-library/dom` contained a breaking change that made `getByRole('form')` fail when the `form` element didn't have an explicit `role` defined. To trace this breaking change down, the first thing we need to do is create a reproduction.
+For example, at a certain moment, `@testing-library/dom` contained a breaking
+change that made `getByRole('form')` fail when the `form` element didn't have an
+explicit `role` defined. To trace this breaking change down, the first thing we
+need to do is create a reproduction.
 
 For this specific case, the following test would throw on their latest version:
 
@@ -45,7 +51,9 @@ test('finds form without role', () => {
 });
 ```
 
-To test this, we would make sure that this script is triggered when running `npm run test`. I used the `test` method from `jest`, but any test script that returns a non-zero exit code on fail, works.
+To test this, we would make sure that this script is triggered when running
+`npm run test`. I used the `test` method from `jest`, but any test script that
+returns a non-zero exit code on fail, works.
 
 Now, instead of `npm run test`, we run:
 
@@ -53,9 +61,11 @@ Now, instead of `npm run test`, we run:
 npx where-broke @testing-library/dom
 ```
 
-This will take some time, as it will run until it finds the breaking version. 
+This will take some time, as it will run until it finds the breaking version.
 
-But no worries, we're not going to test them all. We use a "binary search" to speed up the process. Basically, we'll cut the apple in halves, until we find the rotten part.
+But no worries, we're not going to test them all. We use a "binary search" to
+speed up the process. Basically, we'll cut the apple in halves, until we find
+the rotten part.
 
 ```shell
 ~/dev/dom-issue
@@ -77,4 +87,6 @@ Check for regression in @testing-library/dom
   The tests passed in 6.14.0 and fail since 6.14.1
 ```
 
-Now we know, that the breaking change was introduced in `6.14.1`. The last version that we can use is `6.14.0`, and we can tell the project maintainers that they should look for the cause between `6.14.0` and `6.14.1`;
+Now we know, that the breaking change was introduced in `6.14.1`. The last
+version that we can use is `6.14.0`, and we can tell the project maintainers
+that they should look for the cause between `6.14.0` and `6.14.1`;

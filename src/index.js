@@ -1,14 +1,14 @@
 #! /usr/bin/env node
-const fs = require("fs");
-const util = require("util");
-const child = require("child_process");
-const fetch = require("isomorphic-fetch");
-const ora = require("ora");
+const fs = require('fs');
+const util = require('util');
+const child = require('child_process');
+const fetch = require('isomorphic-fetch');
+const ora = require('ora');
 
 const exec = util.promisify(child.exec);
 const write = util.promisify(fs.writeFile);
 const append = util.promisify(fs.appendFile);
-const logfile = "where-broke.log";
+const logfile = 'where-broke.log';
 
 async function test(pkg) {
   const spinner = ora(`${pkg} installing`).start();
@@ -18,11 +18,11 @@ async function test(pkg) {
   spinner.text = `${pkg} testing`;
 
   try {
-    await exec("npm run test");
+    await exec('npm run test');
     spinner.succeed(`${pkg}`);
     return true;
   } catch (ex) {
-    append(logfile, ex.stderr + "\n\n" + "-".repeat(70) + "\n\n");
+    append(logfile, ex.stderr + '\n\n' + '-'.repeat(70) + '\n\n');
     spinner.fail(`${pkg}`);
     return false;
   }
@@ -34,7 +34,7 @@ async function main({ lib }) {
   const spinner = ora(`Fetch version`).start();
 
   const response = await fetch(`https://registry.npmjs.org/${lib}`);
-  await write(logfile, "");
+  await write(logfile, '');
 
   const data = await response.json();
   const versions = Object.keys(data.versions);
