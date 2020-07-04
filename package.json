@@ -24,6 +24,7 @@
   "keywords": [],
   "devDependencies": {
     "microbundle": "^0.12.2",
+    "prettier": "2.0.5",
     "rimraf": "^3.0.2"
   },
   "dependencies": {
