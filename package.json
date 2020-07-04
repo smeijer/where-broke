@@ -23,8 +23,10 @@
   ],
   "keywords": [],
   "devDependencies": {
+    "husky": "^4.2.5",
     "microbundle": "^0.12.2",
     "prettier": "2.0.5",
+    "pretty-quick": "^2.0.1",
     "rimraf": "^3.0.2"
   },
   "dependencies": {
