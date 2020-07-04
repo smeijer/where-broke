@@ -1,7 +1,7 @@
 {
   "name": "where-broke",
   "version": "1.0.2",
-  "description": "",
+  "description": "Find the version of a lib that broke your tests",
   "source": "src/index.js",
   "bin": "bin/where-broke.js",
   "main": "dist/index.js",
