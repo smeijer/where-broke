@@ -4,56 +4,39 @@ import ora from 'ora';
 import * as yargs from 'yargs';
 
 import { log, exec } from './util';
+import npm from './handlers/npm';
 
 import { bisect, estimate } from './bisect';
 
-async function test(pkg) {
-  const spinner = ora(`${pkg} installing`).start();
+async function main(args) {
+  const { module, interactive } = args;
+  console.log(`Check for regression in ${module}\n`);
 
-  await exec(`npm install ${pkg} --no-save --no-audit`);
 
   spinner.text = `${pkg} testing`;
+  const candidates = await npm.getCandidates(args);
 
-  try {
-    await exec('npm run test');
-    spinner.succeed(`${pkg}`);
-    return true;
-  } catch (ex) {
-    log.log(ex.stderr + '\n\n' + '-'.repeat(70) + '\n\n');
-    spinner.fail(`${pkg}`);
-    return false;
-  }
-}
-
-async function main({ lib }) {
-  console.log(`Check for regression in ${lib}\n`);
-
-  const spinner = ora(`Fetch version`).start();
-
-  const response = await fetch(`https://registry.npmjs.org/${lib}`);
-
-  const data = await response.json();
-  if (!data.versions) {
-    spinner.fail('This package does not have any versions on npm :/');
+  if (candidates.length === 0) {
+    console.error('No candidates found to bisect');
     process.exit(1);
+    return;
   }
 
-  const versions = Object.keys(data.versions);
+  const iterations = estimate(candidates);
 
-  const iterations = estimate(versions);
-
-  spinner.info(
-    `Found ${versions.length} versions, will need to test ${iterations} of them\n`,
+  console.log(
+    `Got ${candidates.length} candidates, will need to check ${iterations} of them\n`,
   );
 
   await log.clear();
 
   const { lastGood, firstBad } = await bisect(
-    (version) => test(`${lib}@${version}`),
-    versions,
+    npm.testCandidate,
+    candidates,
+    args,
   );
 
-  console.log(`\n  The tests passed in ${lastGood} and fail since ${firstBad}`);
+  console.log(`\nThe tests passed in ${lastGood} and fail since ${firstBad}`);
 }
 
 yargs
@@ -71,8 +54,6 @@ yargs
         positional: true,
       },
     },
-    (argv) => {
-      return main({ lib: argv.module });
-    },
+    main,
   )
   .help().argv;

@@ -2,7 +2,7 @@ export function estimate(entries) {
   return Math.ceil(Math.log2(entries.length));
 }
 
-export async function bisect(fn, entries) {
+export async function bisect(fn, entries, arg) {
   let from = 0;
   let to = entries.length - 1;
   let attempt = 0;
@@ -13,7 +13,7 @@ export async function bisect(fn, entries) {
     const mid = Math.floor((from + (to + 1)) / 2);
     const entry = entries[mid];
 
-    const passed = await Promise.resolve(fn(entry, attempt));
+    const passed = await Promise.resolve(fn(entry, attempt, arg));
 
     if (passed) {
       from = mid + 1;
