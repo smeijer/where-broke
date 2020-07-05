@@ -1,20 +1,30 @@
-#! /usr/bin/env node
-import fetch from 'isomorphic-fetch';
-import ora from 'ora';
 import * as yargs from 'yargs';
 
-import { log, exec } from './util';
-import npm from './handlers/npm';
-
+import { log, isTTY, getStdin } from './util';
+import * as handlers from './handlers';
 import { bisect, estimate } from './bisect';
 
 async function main(args) {
   const { module, interactive } = args;
-  console.log(`Check for regression in ${module}\n`);
+  console.log(
+    [`Check for regression`, module && `in ${module}`]
+      .filter(Boolean)
+      .join(' '),
+  );
 
+  let handler;
 
-  spinner.text = `${pkg} testing`;
-  const candidates = await npm.getCandidates(args);
+  if (interactive) {
+    handler = handlers.manual;
+  } else if (args.module) {
+    handler = handlers.npm;
+  }
+
+  if (typeof handler.beforeAll === 'function') {
+    await handler.beforeAll();
+  }
+
+  const candidates = await handler.getCandidates(args);
 
   if (candidates.length === 0) {
     console.error('No candidates found to bisect');
@@ -25,33 +35,49 @@ async function main(args) {
   const iterations = estimate(candidates);
 
   console.log(
-    `Got ${candidates.length} candidates, will need to check ${iterations} of them\n`,
+    `Got ${candidates.length} candidates, will need to check ~ ${iterations} of them\n`,
   );
 
   await log.clear();
 
   const { lastGood, firstBad } = await bisect(
-    npm.testCandidate,
+    handler.testCandidate,
     candidates,
     args,
   );
 
-  console.log(`\nThe tests passed in ${lastGood} and fail since ${firstBad}`);
+  if (!lastGood) {
+    console.log(`\nAll candidates failed`);
+  } else if (!firstBad) {
+    console.log(`\nAll candidates passed`);
+  } else {
+    console.log(`\nLast good: ${lastGood}\nFirst bad: ${firstBad}`);
+  }
+
+  if (typeof handler.afterAll === 'function') {
+    await handler.afterAll();
+  }
 }
 
 yargs
   .scriptName('where-broke')
   .usage('$0 <cmd> [args]')
   .command(
-    '$0 <module>',
+    '$0 [module]',
     'find the version of <module> that broke your tests',
     {
       module: {
         alias: 'm',
         type: 'string',
         describe: 'the module that we are bisecting',
-        demand: true,
+        demand: isTTY,
         positional: true,
+      },
+      interactive: {
+        alias: 'i',
+        type: 'boolean',
+        describe: 'the values to iterate over, comma separated',
+        default: !isTTY,
       },
     },
     main,

@@ -14,17 +14,17 @@ async function getCandidates({ module }) {
 async function testCandidate(candidate, attempt, { module }) {
   const name = `${module}@${candidate}`;
 
-  const spinner = ora(`${name} installing`).start();
+  const spinner = ora(`install  ${name}`).start();
   await exec(`npm install ${name} --no-save --no-audit`);
 
   try {
-    spinner.text = `${name} testing`;
+    spinner.text = `testing  ${name}`;
     await exec('npm run test');
-    spinner.succeed(`${name}`);
+    spinner.succeed(`accepted ${name}`);
     return true;
   } catch (ex) {
     await log.log(ex.stderr + '\n\n' + '-'.repeat(70) + '\n\n');
-    spinner.fail(`${name}`);
+    spinner.fail(`rejected ${name}`);
     return false;
   }
 }
