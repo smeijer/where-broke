@@ -1,14 +1,11 @@
 #! /usr/bin/env node
-const fs = require("fs");
-const util = require("util");
-const child = require("child_process");
-const fetch = require("isomorphic-fetch");
-const ora = require("ora");
+import fetch from 'isomorphic-fetch';
+import ora from 'ora';
+import * as yargs from 'yargs';
 
-const exec = util.promisify(child.exec);
-const write = util.promisify(fs.writeFile);
-const append = util.promisify(fs.appendFile);
-const logfile = "where-broke.log";
+import { log, exec } from './util';
+
+import { bisect, estimate } from './bisect';
 
 async function test(pkg) {
   const spinner = ora(`${pkg} installing`).start();
@@ -18,11 +15,11 @@ async function test(pkg) {
   spinner.text = `${pkg} testing`;
 
   try {
-    await exec("npm run test");
+    await exec('npm run test');
     spinner.succeed(`${pkg}`);
     return true;
   } catch (ex) {
-    append(logfile, ex.stderr + "\n\n" + "-".repeat(70) + "\n\n");
+    log.log(ex.stderr + '\n\n' + '-'.repeat(70) + '\n\n');
     spinner.fail(`${pkg}`);
     return false;
   }
@@ -34,47 +31,48 @@ async function main({ lib }) {
   const spinner = ora(`Fetch version`).start();
 
   const response = await fetch(`https://registry.npmjs.org/${lib}`);
-  await write(logfile, "");
 
   const data = await response.json();
-  const versions = Object.keys(data.versions);
-
-  const iterations = Math.ceil(Math.log2(versions.length));
-
-  spinner.info(
-    `Found ${versions.length} versions, will need to test ${iterations} of them\n`
-  );
-
-  let from = 0;
-  let to = versions.length - 1;
-
-  while (from <= to) {
-    const mid = Math.floor((from + (to + 1)) / 2);
-    const version = versions[mid];
-
-    const passed = await test(`${lib}@${version}`);
-
-    if (passed) {
-      from = mid + 1;
-    } else {
-      to = mid - 1;
-    }
+  if (!data.versions) {
+    spinner.fail('This package does not have any versions on npm :/');
+    process.exit(1);
   }
 
-  console.log(
-    `\n  The tests passed in ${versions[to]} and fail since ${versions[from]}`
+  const versions = Object.keys(data.versions);
+
+  const iterations = estimate(versions);
+
+  spinner.info(
+    `Found ${versions.length} versions, will need to test ${iterations} of them\n`,
   );
+
+  await log.clear();
+
+  const { lastGood, firstBad } = await bisect(
+    (version) => test(`${lib}@${version}`),
+    versions,
+  );
+
+  console.log(`\n  The tests passed in ${lastGood} and fail since ${firstBad}`);
 }
 
-const [lib] = Array.from(process.argv).slice(2);
-
-if (!lib) {
-  console.log(`
-  no package name provided, please provide a package name:\n
-  
-    > npx where-broke @testing-library/dom
-`);
-  process.exit(0);
-}
-
-main({ lib });
+yargs
+  .scriptName('where-broke')
+  .usage('$0 <cmd> [args]')
+  .command(
+    '$0 <module>',
+    'find the version of <module> that broke your tests',
+    {
+      module: {
+        alias: 'm',
+        type: 'string',
+        describe: 'the module that we are bisecting',
+        demand: true,
+        positional: true,
+      },
+    },
+    (argv) => {
+      return main({ lib: argv.module });
+    },
+  )
+  .help().argv;

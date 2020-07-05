@@ -13,8 +13,15 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf ./dist && microbundle -i src/index.js -o dist/index.js --no-pkg-main -f umd",
-    "prepublish": "npm run build"
+    "build": "rimraf ./dist && microbundle -i src/index.js -o dist/index.js --no-pkg-main -f umd--target node",
+    "watch": "rimraf ./dist && microbundle -i src/index.js -o dist/index.js --no-pkg-main -f umd --sourcemap true --compress false --target node --watch --raw",
+    "prettier": "prettier . --write",
+    "prepublish": "npm run build",
+    "bump:patch": "npm version patch -m 'release: cut the %s release'",
+    "bump:minor": "npm version minor -m 'release: cut the %s release'",
+    "bump:major": "npm version major -m 'release: cut the %s release'",
+    "preversion": "npm run test && npm run build",
+    "postversion": "git push && git push --tags && npm publish"
   },
   "files": [
     "docs",
@@ -23,11 +30,15 @@
   ],
   "keywords": [],
   "devDependencies": {
+    "husky": "^4.2.5",
     "microbundle": "^0.12.2",
+    "prettier": "^2.0.5",
+    "pretty-quick": "^2.0.1",
     "rimraf": "^3.0.2"
   },
   "dependencies": {
     "isomorphic-fetch": "^2.2.1",
-    "ora": "^4.0.4"
+    "ora": "^4.0.4",
+    "yargs": "^15.4.0"
   }
 }

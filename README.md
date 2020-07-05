@@ -53,7 +53,7 @@ Now, instead of `npm run test`, we run:
 npx where-broke @testing-library/dom
 ```
 
-This will take some time, as it will run until it finds the breaking version. 
+This will take some time, as it will run until it finds the breaking version.
 
 But no worries, we're not going to test them all. We use a "binary search" to speed up the process. Basically, we'll cut the apple in halves, until we find the rotten part.
 
