@@ -12,7 +12,7 @@
     "url": "git+https://github.com/smeijer/where-broke.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 0",
     "build": "rimraf ./dist && microbundle -i src/index.js -o dist/index.js --no-pkg-main -f umd--target node",
     "watch": "rimraf ./dist && microbundle -i src/index.js -o dist/index.js --no-pkg-main -f umd --sourcemap true --compress false --target node --watch --raw",
     "prettier": "prettier . --write",
