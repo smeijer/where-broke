@@ -7,8 +7,8 @@
     "README.md"
   ],
   "imageSize": 100,
-  "commit": false,
-  "commitConvention": "none",
+  "commit": true,
+  "commitConvention": "angular",
   "contributors": [
     {
       "login": "smeijer",
@@ -20,15 +20,6 @@
         "code",
         "infra",
         "maintenance"
-      ]
-    },
-    {
-      "login": "MichaelDeBoey",
-      "name": "Michaël De Boey",
-      "avatar_url": "https://avatars3.githubusercontent.com/u/6643991?v=4",
-      "profile": "https://michaeldeboey.be/",
-      "contributions": [
-        "code"
       ]
     }
   ],
