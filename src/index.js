@@ -19,7 +19,7 @@ async function main(args) {
     handler = handlers.manual;
   } else if (args.module && fs.existsSync('yarn.lock')) {
     handler = handlers.yarn;
-  } else {
+  } else if (args.module) {
     handler = handlers.npm;
   }
 
