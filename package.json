@@ -28,7 +28,7 @@
     "dist",
     "bin"
   ],
-  "keywords": [],
+  "keywords": ["nodejs", "cli", "testing", "analysis"],
   "devDependencies": {
     "husky": "^4.2.5",
     "microbundle": "^0.12.2",
